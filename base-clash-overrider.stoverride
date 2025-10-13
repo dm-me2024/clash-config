@@ -10,39 +10,45 @@ rule-providers: #!replace
   AD-REJECT:
     type: http
     behavior: domain
+    format: text
     url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Advertising/Advertising_Domain.txt'
     interval: 86400
   
   SteamCN:
     type: http
     behavior: classical
+    format: yaml
     url: 'https://api-gz.hosbbq.com/nus74f89st1/SC.yml'
     interval: 86400
   
   Bahamut:
     type: http
     behavior: classical
+    format: yaml
     url: 'https://api-gz.hosbbq.com/nus74f89st1/Ba.yml'
     interval: 86400
   
   DMM:
     type: http
     behavior: classical
+    format: yaml
     url: 'https://api-gz.hosbbq.com/nus74f89st1/DM.yml'
     interval: 86400
   
   ChinaMax:
     type: http
     behavior: classical
+    format: yaml
     url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax.yaml'
     interval: 86400
   
   ChinaMaxIp:
     type: http
     behavior: domain
+    format: text
     url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_IP_No_IPv6.txt'
     interval: 86400
-    
+
 rules: #!replace
     - 'PROCESS-NAME,aria2c,DIRECT'
     - 'RULE-SET,AD-REJECT,REJECT'
