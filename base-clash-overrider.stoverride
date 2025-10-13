@@ -6,7 +6,7 @@ author: |-
 category: 'BASE'
 date: '2025-10-12 07:13:21'
 
-rule-providers:
+rule-providers: #!replace
   AD-REJECT:
     type: http
     behavior: domain
@@ -65,8 +65,8 @@ rules: #!replace
     - 'RULE-SET,SteamCN,DIRECT'
     - 'RULE-SET,ChinaMaxIp,DIRECT'
     - 'RULE-SET,ChinaMax,DIRECT'
-    - 'RULE-SET,Bahamut,🇨🇳 TW-AUTO'
-    - 'RULE-SET,DMM,🇯🇵 JP-AUTO'
+    - 'RULE-SET,Bahamut,🇨🇳TW-AUTO'
+    - 'RULE-SET,DMM,🇯🇵JP-AUTO'
     - 'GEOIP,CN,DIRECT'
     - 'GEOIP,LAN,DIRECT'
     - 'MATCH,PROXY'
@@ -93,8 +93,6 @@ proxy-groups: #!replace
   - name: ⚡ Auto-Fallback
     type: fallback
     url: 'http://cp.cloudflare.com/generate_204'
-    interval: 300
-    tolerance: 100
     proxies:
       - 🇭🇰HK-AUTO
       - 🇨🇳TW-AUTO
@@ -110,7 +108,7 @@ proxy-groups: #!replace
   - name: 🔀 Load-Balance
     type: load-balance
     url: 'http://cp.cloudflare.com/generate_204'
-    interval: 300
+    interval: 600
     strategy: consistent-hashing
     proxies:
       - 🇭🇰HK-AUTO
@@ -127,32 +125,36 @@ proxy-groups: #!replace
   - name: 🇭🇰HK-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)(hong\s?kong|香港|hk|🇭🇰)'
 
   # 台湾节点组
   - name: 🇨🇳TW-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)(taiwan|台湾|tw|Taiwan)'
 
   # 新加坡节点组
   - name: 🇸🇬SG-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)(singapore|新加坡|狮城|sg|🇸🇬)'
 
   # 日本节点组
   - name: 🇯🇵JP-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)(japan|日本|jp|🇯🇵)'
 
   # 美国节点组
@@ -167,30 +169,34 @@ proxy-groups: #!replace
   - name: 🇰🇷KR-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)(korea|韩国|kr|🇰🇷)'
 
   # 加拿大节点组
   - name: 🇨🇦CA-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)(canada|加拿大|ca|🇨🇦)'
 
   # 英国节点组
   - name: 🇬🇧GB-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)(britain|英国|uk|gb|🇬🇧)'
 
   # 其他地区节点组 - 匹配所有未被上述规则匹配的节点
   - name: OTHER-AUTO
     type: url-test
     url: 'http://www.google.com/generate_204'
-    interval: 300
-    tolerance: 50
+    interval: 600
+    tolerance: 80
+    include-all: true
     filter: '(?i)^(?!.*(hong\s?kong|香港|hk|taiwan|台湾|tw|singapore|新加坡|sg|japan|日本|jp|united\s?states|美国|us|korea|韩国|kr|canada|加拿大|ca|britain|英国|uk|gb)).*'
