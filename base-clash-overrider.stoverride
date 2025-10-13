@@ -6,7 +6,7 @@ author: |-
 category: 'BASE'
 date: '2025-10-12 07:13:21'
 
-rule-providers: #!replace
+rule-providers: #!prepend
   AD-REJECT:
     type: http
     behavior: domain
