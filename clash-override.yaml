@@ -1,4 +1,3 @@
-
 name: 'BASE-OVERRIDE'
 desc: |-
   clash基础配置
@@ -7,7 +6,7 @@ author: |-
 category: 'BASE'
 date: '2025-10-12 07:13:21'
 
-rule-providers: #!prepend
+rule-providers: #!replace
   AD-REJECT:
     type: http
     behavior: domain
@@ -94,7 +93,7 @@ proxy-groups: #!replace
   # 自动故障转移 - 按延迟自动切换到可用节点
   - name: ⚡ Auto-Fallback
     type: fallback
-    url: 'http://cp.cloudflare.com/generate_204'
+    url: 'http://www.google.com/generate_204'
     proxies:
       - 🇭🇰HK-AUTO
       - 🇨🇳TW-AUTO
@@ -109,7 +108,7 @@ proxy-groups: #!replace
   # 负载均衡 - 分散流量到多个节点
   - name: 🔀 Load-Balance
     type: load-balance
-    url: 'http://cp.cloudflare.com/generate_204'
+    url: 'http://www.google.com/generate_204'
     interval: 600
     strategy: consistent-hashing
     proxies:
@@ -130,7 +129,7 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)(hong\s?kong|香港|hk|🇭🇰)'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(hong\s?kong|香港|hk|🇭🇰).*'
 
   # 台湾节点组
   - name: 🇨🇳TW-AUTO
@@ -139,7 +138,7 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)(taiwan|台湾|tw|Taiwan)'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(taiwan|台湾|tw|🇹🇼).*'
 
   # 新加坡节点组
   - name: 🇸🇬SG-AUTO
@@ -148,7 +147,7 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)(singapore|新加坡|狮城|sg|🇸🇬)'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(singapore|新加坡|狮城|sg|🇸🇬).*'
 
   # 日本节点组
   - name: 🇯🇵JP-AUTO
@@ -157,7 +156,7 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)(japan|日本|jp|🇯🇵)'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(japan|日本|jp|🇯🇵).*'
 
   # 美国节点组
   - name: 🇺🇸US-AUTO
@@ -165,7 +164,8 @@ proxy-groups: #!replace
     url: 'http://www.google.com/generate_204'
     interval: 600
     tolerance: 80
-    filter: '(?i)(united\s?states|美国|us|🇺🇸)'
+    include-all: true
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(united\s?states|美国|us|🇺🇸).*'
 
   # 韩国节点组
   - name: 🇰🇷KR-AUTO
@@ -174,7 +174,7 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)(korea|韩国|kr|🇰🇷)'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(korea|韩国|south\s?korea|kr|🇰🇷).*'
 
   # 加拿大节点组
   - name: 🇨🇦CA-AUTO
@@ -183,7 +183,7 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)(canada|加拿大|ca|🇨🇦)'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(canada|加拿大|ca|🇨🇦).*'
 
   # 英国节点组
   - name: 🇬🇧GB-AUTO
@@ -192,7 +192,7 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)(britain|英国|uk|gb|🇬🇧)'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\d+\s?(GB|TB|MB)|Days?\s?Left)).*(?i)(great\s?britain|britain|英国|uk|🇬🇧).*'
 
   # 其他地区节点组 - 匹配所有未被上述规则匹配的节点
   - name: OTHER-AUTO
@@ -201,4 +201,4 @@ proxy-groups: #!replace
     interval: 600
     tolerance: 80
     include-all: true
-    filter: '(?i)^(?!.*(hong\s?kong|香港|hk|taiwan|台湾|tw|singapore|新加坡|sg|japan|日本|jp|united\s?states|美国|us|korea|韩国|kr|canada|加拿大|ca|britain|英国|uk|gb)).*'
+    filter: '^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|此地區|\d+\s?(GB|TB|MB)|Days?\s?Left|hong\s?kong|香港|hk|taiwan|台湾|tw|singapore|新加坡|sg|japan|日本|jp|united\s?states|美国|us|korea|韩国|kr|canada|加拿大|ca|britain|英国|uk|gb|🇭🇰|🇨🇳|🇹🇼|🇸🇬|🇯🇵|🇺🇸|🇰🇷|🇨🇦|🇬🇧)).*'
