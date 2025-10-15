@@ -8,13 +8,6 @@ category: 'BASE'
 date: '2025-10-12 07:13:21'
 
 rule-providers: #!replace
-  AD-REJECT:
-    type: http
-    behavior: domain
-    format: text
-    url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Advertising/Advertising_Domain.txt'
-    interval: 86400
-  
   SteamCN:
     type: http
     behavior: classical
@@ -52,7 +45,6 @@ rule-providers: #!replace
 
 rules: #!replace
     - 'PROCESS-NAME,aria2c,DIRECT'
-    - 'RULE-SET,AD-REJECT,REJECT'
     - 'DOMAIN-SUFFIX,local,DIRECT'
     - 'IP-CIDR,127.0.0.0/8,DIRECT'
     - 'IP-CIDR,172.16.0.0/12,DIRECT'
