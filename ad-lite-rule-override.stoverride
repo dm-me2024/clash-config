@@ -7,12 +7,19 @@ category: 'BASE'
 date: '2025-10-12 07:13:21'
 
 rule-providers:
-  AD-LITE-REJECT:
+  AD-LITE-DOMAIN-REJECT:
     type: http
     behavior: domain
-    format: mrs
-    url: 'https://gcore.jsdelivr.net/gh/217heidai/adblockfilters@main/rules/adblockmihomolite.mrs'
+    format: txt
+    url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/AdvertisingLite/AdvertisingLite_Domain.txt'
+    interval: 86400
+  AD-LITE-CLASSICAL-REJECT:
+    type: http
+    behavior: classical
+    format: yaml
+    url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/AdvertisingLite/AdvertisingLite.yaml'
     interval: 86400
 
 rules: 
-    - 'RULE-SET,AD-LITE-REJECT,REJECT'
+    - 'RULE-SET,AD-LITE-DOMAIN-REJECT,REJECT'
+    - 'RULE-SET,AD-LITE-CLASSICAL-REJECT,REJECT'
