@@ -11,8 +11,8 @@ rule-providers:
   AD-REJECT:
     type: http
     behavior: domain
-    format: text
-    url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Advertising/Advertising_Domain.txt'
+    format: mrs
+    url: https://raw.githubusercontent.com/REIJI007/AdBlock_Rule_For_Clash/main/adblock_reject.mrs
     interval: 86400
 
 rules: 
