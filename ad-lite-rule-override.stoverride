@@ -1,0 +1,18 @@
+name: 'AD-LITE-OVERRIDE'
+desc: |-
+  clash广告
+author: |-
+  dmme
+category: 'BASE'
+date: '2025-10-12 07:13:21'
+
+rule-providers:
+  AD-LITE-REJECT:
+    type: http
+    behavior: domain
+    format: text
+    url: 'https://gcore.jsdelivr.net/gh/217heidai/adblockfilters@main/rules/adblockmihomolite.yaml'
+    interval: 86400
+
+rules: 
+    - 'RULE-SET,AD-LITE-REJECT,REJECT'
