@@ -10,7 +10,7 @@ rule-providers:
   AD-LITE-REJECT:
     type: http
     behavior: domain
-    format: text
+    format: yaml
     url: 'https://gcore.jsdelivr.net/gh/217heidai/adblockfilters@main/rules/adblockmihomolite.yaml'
     interval: 86400
 
