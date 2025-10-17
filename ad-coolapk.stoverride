@@ -10,6 +10,7 @@ http:
   mitm:
     - "api.coolapk.com"
     - "sdk.e.qq.com"
+    - "utoken.umeng.com"
   body-rewrite:
     - >-
       ^https:\/\/api\.coolapk\.com\/v6\/feed\/detail\? response-jq .data.hotReplyRows |= if . then map(select(.id?)) else . end | .data.topReplyRows |= if . then map(select(.id?)) else . end | reduce ("detailSponsorCard", "include_goods", "include_goods_ids") as $key (.; .data[$key]=[])
@@ -24,5 +25,8 @@ http:
 
   mock:
     - match: ^https:\/\/sdk\.e\.qq\.com\/launch
+      text: ''
+      status-code: 404
+    - match: ^https:\/\/utoken\.umeng\.com\/anti\/updateZdata
       text: ''
       status-code: 404
