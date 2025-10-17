@@ -1,22 +1,18 @@
-name: |-
-  酷安去广告
+name: 'Coolapk-Filter'
 desc: |-
-  过滤酷安广告
+  酷安广告过滤配置 - 过滤 entityType 为 card 的内容
 author: |-
-  可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
-icon: |-
-  https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/CoolApk.png
-tag: |-
-  去广告
-homepage: |-
-  https://hub.kelee.one
-date: |-
-  2025-05-13 15:17:08
+  dmme
+category: 'APP去广告'
+date: '2025-10-17'
 
 http:
-
   mitm:
     - "api.coolapk.com"
+
   body-rewrite:
+    # 过滤 page/dataList 接口中 entityType 为 card 的对象
     - >-
-      ^https:\/\/api\.coolapk\.com\/v6\/main\/init response-jq .data |= map(select(.entityId? | [944,945,6390] | index(.) | not) | if .entityId == 20131 then .entities |= map(select(.title != "酷品")) else . end)
+      ^https:\/\/api\.coolapk\.com\/v6\/page\/dataList response-jq if .data? and ((.data | type) == "array") and (.data | length > 0) then .data |= map(select(.entityType? != "card")) else . end
+    - >-
+      ^https:\/\/api\.coolapk\.com\/v6\/main\/indexV8 response-jq if .data? and ((.data | type) == "array") and (.data | length > 0) then .data |= map(select(.entityType? != "card")) else . end
