@@ -1,6 +1,8 @@
 name: 'Coolapk-Filter'
 desc: |-
-  酷安广告过滤配置 - 过滤 entityType 为 card 的内容
+  酷安广告过滤配置
+  - page/dataList: 过滤 entityType 为 card 的内容
+  - main/indexV8: 过滤 entityType 为 card 且 entities 为空列表的内容
 author: |-
   dmme
 category: 'APP去广告'
@@ -14,5 +16,6 @@ http:
     # 过滤 page/dataList 接口中 entityType 为 card 的对象
     - >-
       ^https:\/\/api\.coolapk\.com\/v6\/page\/dataList response-jq if .data? and ((.data | type) == "array") and (.data | length > 0) then .data |= map(select(.entityType? != "card")) else . end
+    # 过滤 main/indexV8 接口中 entityType 为 card 且 entities 为空列表的对象
     - >-
-      ^https:\/\/api\.coolapk\.com\/v6\/main\/indexV8 response-jq if .data? and ((.data | type) == "array") and (.data | length > 0) then .data |= map(select(.entityType? != "card")) else . end
+      ^https:\/\/api\.coolapk\.com\/v6\/main\/indexV8 response-jq if .data? and ((.data | type) == "array") and (.data | length > 0) then .data |= map(select(not((.entityType? == "card") and ((.entities? | length) == 0)))) else . end
