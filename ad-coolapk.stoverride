@@ -9,6 +9,7 @@ date: '2025-10-17'
 http:
   mitm:
     - "api.coolapk.com"
+    - "sdk.e.qq.com"
   body-rewrite:
     - >-
       ^https:\/\/api\.coolapk\.com\/v6\/feed\/detail\? response-jq .data.hotReplyRows |= if . then map(select(.id?)) else . end | .data.topReplyRows |= if . then map(select(.id?)) else . end | reduce ("detailSponsorCard", "include_goods", "include_goods_ids") as $key (.; .data[$key]=[])
@@ -20,3 +21,8 @@ http:
       ^https:\/\/api\.coolapk\.com\/v6\/page\/dataList response-jq if (.data | length > 0) then .data |= map(select((.title? != "酷安热搜") and (.entityTemplate? != "imageScaleCard") and (.entityTemplate? != "sponsorCard"))) else . end
     - >-
       ^https:\/\/api\.coolapk\.com\/v6\/main\/init response-jq .data |= map(select(.entityId? | [944,945,6390] | index(.) | not) | if .entityId == 20131 then .entities |= map(select(.title != "酷品")) else . end)
+
+  mock:
+    - match: ^https:\/\/sdk\.e\.qq\.com\/launch
+      text: ''
+      status-code: 404
