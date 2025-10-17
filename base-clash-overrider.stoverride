@@ -8,6 +8,12 @@ category: 'BASE'
 date: '2025-10-12 07:13:21'
 
 rule-providers: #!replace
+  BaseAD:
+    type: http
+    behavior: classical
+    format: yaml
+    url: 'https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Clash/RuleSet/AD.yaml'
+    interval: 86400
   SteamCN:
     type: http
     behavior: classical
@@ -44,6 +50,7 @@ rule-providers: #!replace
     interval: 86400
 
 rules: #!replace
+    - 'RULE-SET,BaseAD,REJECT'
     - 'PROCESS-NAME,aria2c,DIRECT'
     - 'DOMAIN-SUFFIX,local,DIRECT'
     - 'IP-CIDR,127.0.0.0/8,DIRECT'
