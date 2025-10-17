@@ -21,7 +21,7 @@ http:
     - >-
       ^https:\/\/api\.coolapk\.com\/v6\/page\/dataList response-jq if (.data | length > 0) then .data |= map(select((.title? != "酷安热搜") and (.entityTemplate? != "imageScaleCard") and (.entityTemplate? != "sponsorCard"))) else . end
     - >-
-      ^https:\/\/api\.coolapk\.com\/v6\/main\/init response-jq .data |= map(select(.entityId? | [944,945,6390] | index(.) | not) | if .entityId == 20131 then .entities |= map(select(.title != "酷品")) else . end)
+      ^https:\/\/api\.coolapk\.com\/v6\/main\/indexV8 response-jq if .data? and ((.data | type) == "array") and (.data | length > 0) then .data |= map(select(not((.entityTemplate? == "sponsorCard") and (.entityType? == "card")))) else . end
 
   mock:
     - match: ^https:\/\/sdk\.e\.qq\.com\/launch
