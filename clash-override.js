@@ -1,50 +1,106 @@
 	const main = (config) => {
-	  // 替换 rule-providers 部分
+	  // ================= 1. 基础配置 =================
+	  // 排除流量、过期时间等干扰信息的正则
+	  const excludeTraffic = '(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left))';
+	  // 定义国家/地区库：包含 代理组名称后缀、旗帜符号、匹配关键词
+	  // 脚本将根据此列表顺序进行匹配和排序
+	  const countryDefs = [
+	    { key: 'HK',  flag: '🇭🇰', keywords: 'hong\\s?kong|香港|hk|🇭🇰' },
+	    { key: 'TW',  flag: '🇨🇳', keywords: 'taiwan|台湾|tw|🇹🇼' },
+	    { key: 'SG',  flag: '🇸🇬', keywords: 'singapore|新加坡|狮城|sg|🇸🇬' },
+	    { key: 'JP',  flag: '🇯🇵', keywords: 'japan|日本|jp|🇯🇵' },
+	    { key: 'US',  flag: '🇺🇸', keywords: 'united\\s?states|美国|us|🇺🇸' },
+	    { key: 'KR',  flag: '🇰🇷', keywords: 'korea|韩国|south\\s?korea|kr|🇰🇷' },
+	    { key: 'CA',  flag: '🇨🇦', keywords: 'canada|加拿大|ca|🇨🇦' },
+	    { key: 'GB',  flag: '🇬🇧', keywords: 'great\\s?britain|britain|英国|uk|🇬🇧' },
+	    { key: 'DE',  flag: '🇩🇪', keywords: 'germany|德国|de|🇩🇪' },
+	    { key: 'FR',  flag: '🇫🇷', keywords: 'france|法国|fr|🇫🇷' },
+	    { key: 'AU',  flag: '🇦🇺', keywords: 'australia|澳大利亚|澳洲|au|🇦🇺' },
+	    { key: 'RU',  flag: '🇷🇺', keywords: 'russia|俄罗斯|ru|🇷🇺' },
+	    { key: 'NL',  flag: '🇳🇱', keywords: 'netherlands|荷兰|nl|🇳🇱' },
+	    { key: 'IN',  flag: '🇮🇳', keywords: 'india|印度|in|🇮🇳' }
+	  ];
+	  // ================= 2. 动态检测节点 =================
+	  const availableGroups = []; // 存储实际生成的代理组配置
+	  const availableGroupNames = []; // 存储代理组名称，用于注入到选择列表中
+	  const allKeywordsList = []; // 存储所有已定义国家的关键词，用于 OTHER 排除
+	  // 遍历所有定义的国家，去节点列表中查找是否存在
+	  countryDefs.forEach(country => {
+	    // 构建用于 Clash 过滤器的正则字符串 (包含排除流量逻辑)
+	    const filterRegex = `^${excludeTraffic}.*(?i)(${country.keywords}).*`;
+	    // 构建用于 JS 检测的正则对象 (注意：JS中不需要 (?i)，而是使用 'i' 标志)
+	    // 这里稍微简化一下检测逻辑：只要节点名包含关键词且不含流量信息即可
+	    const detectRegex = new RegExp(`^${excludeTraffic}.*(${country.keywords}).*$`, 'i');
+	    // 在 config.proxies 中查找是否有匹配的节点
+	    const hasMatch = (config.proxies || []).some(p => detectRegex.test(p.name));
+	    // 如果有匹配的节点，则创建该代理组
+	    if (hasMatch) {
+	      const groupName = `${country.flag}${country.key}-AUTO`;
+	      availableGroupNames.push(groupName);
+	      allKeywordsList.push(country.keywords);
+	      availableGroups.push({
+	        name: groupName,
+	        type: 'url-test',
+	        url: 'http://www.google.com/generate_204',
+	        interval: 600,
+	        tolerance: 80,
+	        'include-all': true,
+	        filter: filterRegex
+	      });
+	    }
+	  });
+	  // ================= 3. 处理 OTHER-AUTO =================
+	  // 构建 OTHER 的正则：排除流量信息 且 排除所有已识别的国家关键词
+	  const otherExcludeKeywords = allKeywordsList.join('|');
+	  // 如果没有任何国家被识别，OTHER 就匹配所有非流量节点；否则排除已识别国家
+	  const otherFilter = allKeywordsList.length > 0 
+	    ? `^${excludeTraffic}.*(?i)(?!.*(${otherExcludeKeywords})).*` 
+	    : `^${excludeTraffic}.*`;
+	  availableGroups.push({
+	    name: 'OTHER-AUTO',
+	    type: 'url-test',
+	    url: 'http://www.google.com/generate_204',
+	    interval: 600,
+	    tolerance: 80,
+	    'include-all': true,
+	    filter: otherFilter
+	  });
+	  availableGroupNames.push('OTHER-AUTO');
+	  // ================= 4. 组装最终配置 =================
+	  // Rule Providers (保持不变)
 	  config['rule-providers'] = {
 	    'AD-REJECT': {
-	      type: 'http',
-	      behavior: 'domain',
-	      format: 'text',
+	      type: 'http', behavior: 'domain', format: 'text',
 	      url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Advertising/Advertising_Domain.txt',
 	      interval: 86400
 	    },
 	    'SteamCN': {
-	      type: 'http',
-	      behavior: 'classical',
-	      format: 'yaml',
+	      type: 'http', behavior: 'classical', format: 'yaml',
 	      url: 'https://api-gz.hosbbq.com/nus74f89st1/SC.yml',
 	      interval: 86400
 	    },
 	    'Bahamut': {
-	      type: 'http',
-	      behavior: 'classical',
-	      format: 'yaml',
+	      type: 'http', behavior: 'classical', format: 'yaml',
 	      url: 'https://api-gz.hosbbq.com/nus74f89st1/Ba.yml',
 	      interval: 86400
 	    },
 	    'DMM': {
-	      type: 'http',
-	      behavior: 'classical',
-	      format: 'yaml',
+	      type: 'http', behavior: 'classical', format: 'yaml',
 	      url: 'https://api-gz.hosbbq.com/nus74f89st1/DM.yml',
 	      interval: 86400
 	    },
 	    'ChinaMax': {
-	      type: 'http',
-	      behavior: 'classical',
-	      format: 'yaml',
+	      type: 'http', behavior: 'classical', format: 'yaml',
 	      url: 'https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax.yaml',
 	      interval: 86400
 	    },
 	    'ChinaMaxIp': {
-	      type: 'http',
-	      behavior: 'ipcidr',
-	      format: 'text',
+	      type: 'http', behavior: 'ipcidr', format: 'text',
 	      url: 'https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_IP_No_IPv6.txt',
 	      interval: 86400
 	    }
 	  };
-	  // 替换 rules 部分
+	  // Rules (保持不变)
 	  config.rules = [
 	    'PROCESS-NAME,aria2c,DIRECT',
 	    'RULE-SET,AD-REJECT,REJECT',
@@ -68,54 +124,18 @@
 	    'GEOIP,LAN,DIRECT',
 	    'MATCH,PROXY'
 	  ];
-	  // 定义通用的过滤正则：排除流量信息、过期时间等干扰项
-	  const excludeTraffic = '(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left))';
-	  // 替换 proxy-groups 部分
+	  // Proxy Groups (动态生成)
 	  config['proxy-groups'] = [
 	    {
 	      name: 'PROXY',
 	      type: 'select',
-	      proxies: [
-	        '⚡ Auto-Fallback',
-	        '🔀 Load-Balance',
-	        '🇭🇰HK-AUTO',
-	        '🇨🇳TW-AUTO',
-	        '🇸🇬SG-AUTO',
-	        '🇯🇵JP-AUTO',
-	        '🇺🇸US-AUTO',
-	        '🇰🇷KR-AUTO',
-	        '🇨🇦CA-AUTO',
-	        '🇬🇧GB-AUTO',
-	        '🇩🇪DE-AUTO', // 新增
-	        '🇫🇷FR-AUTO', // 新增
-	        '🇦🇺AU-AUTO', // 新增
-	        '🇷🇺RU-AUTO', // 新增
-	        '🇳🇱NL-AUTO', // 新增
-	        '🇮🇳IN-AUTO', // 新增
-	        'OTHER-AUTO'
-	      ]
+	      proxies: ['⚡ Auto-Fallback', '🔀 Load-Balance', ...availableGroupNames]
 	    },
 	    {
 	      name: '⚡ Auto-Fallback',
 	      type: 'fallback',
 	      url: 'http://www.google.com/generate_204',
-	      proxies: [
-	        '🇭🇰HK-AUTO',
-	        '🇨🇳TW-AUTO',
-	        '🇸🇬SG-AUTO',
-	        '🇯🇵JP-AUTO',
-	        '🇺🇸US-AUTO',
-	        '🇰🇷KR-AUTO',
-	        '🇨🇦CA-AUTO',
-	        '🇬🇧GB-AUTO',
-	        '🇩🇪DE-AUTO', // 新增
-	        '🇫🇷FR-AUTO', // 新增
-	        '🇦🇺AU-AUTO', // 新增
-	        '🇷🇺RU-AUTO', // 新增
-	        '🇳🇱NL-AUTO', // 新增
-	        '🇮🇳IN-AUTO', // 新增
-	        'OTHER-AUTO'
-	      ]
+	      proxies: [...availableGroupNames] // 按检测到的国家顺序填充
 	    },
 	    {
 	      name: '🔀 Load-Balance',
@@ -123,163 +143,9 @@
 	      url: 'http://www.google.com/generate_204',
 	      interval: 600,
 	      strategy: 'consistent-hashing',
-	      proxies: [
-	        '🇭🇰HK-AUTO',
-	        '🇨🇳TW-AUTO',
-	        '🇸🇬SG-AUTO',
-	        '🇯🇵JP-AUTO',
-	        '🇺🇸US-AUTO',
-	        '🇰🇷KR-AUTO',
-	        '🇨🇦CA-AUTO',
-	        '🇬🇧GB-AUTO',
-	        '🇩🇪DE-AUTO', // 新增
-	        '🇫🇷FR-AUTO', // 新增
-	        '🇦🇺AU-AUTO', // 新增
-	        '🇷🇺RU-AUTO', // 新增
-	        '🇳🇱NL-AUTO', // 新增
-	        '🇮🇳IN-AUTO', // 新增
-	        'OTHER-AUTO'
-	      ]
+	      proxies: [...availableGroupNames] // 按检测到的国家顺序填充
 	    },
-	    // --- 原有配置 ---
-	    {
-	      name: '🇭🇰HK-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(hong\\s?kong|香港|hk|🇭🇰).*`
-	    },
-	    {
-	      name: '🇨🇳TW-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(taiwan|台湾|tw|🇹🇼).*`
-	    },
-	    {
-	      name: '🇸🇬SG-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(singapore|新加坡|狮城|sg|🇸🇬).*`
-	    },
-	    {
-	      name: '🇯🇵JP-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(japan|日本|jp|🇯🇵).*`
-	    },
-	    {
-	      name: '🇺🇸US-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(united\\s?states|美国|us|🇺🇸).*`
-	    },
-	    {
-	      name: '🇰🇷KR-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(korea|韩国|south\\s?korea|kr|🇰🇷).*`
-	    },
-	    {
-	      name: '🇨🇦CA-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(canada|加拿大|ca|🇨🇦).*`
-	    },
-	    {
-	      name: '🇬🇧GB-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(great\\s?britain|britain|英国|uk|🇬🇧).*`
-	    },
-	    // --- 新增国家配置 ---
-	    {
-	      name: '🇩🇪DE-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(germany|德国|de|🇩🇪).*`
-	    },
-	    {
-	      name: '🇫🇷FR-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(france|法国|fr|🇫🇷).*`
-	    },
-	    {
-	      name: '🇦🇺AU-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(australia|澳大利亚|澳洲|au|🇦🇺).*`
-	    },
-	    {
-	      name: '🇷🇺RU-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(russia|俄罗斯|ru|🇷🇺).*`
-	    },
-	    {
-	      name: '🇳🇱NL-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(netherlands|荷兰|nl|🇳🇱).*`
-	    },
-	    {
-	      name: '🇮🇳IN-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      filter: `${excludeTraffic}.*(?i)(india|印度|in|🇮🇳).*`
-	    },
-	    // --- 其他配置 ---
-	    {
-	      name: 'OTHER-AUTO',
-	      type: 'url-test',
-	      url: 'http://www.google.com/generate_204',
-	      interval: 600,
-	      tolerance: 80,
-	      'include-all': true,
-	      // 更新排除列表，增加新增国家的关键词，防止误匹配
-	      filter: `${excludeTraffic}.*(?i)(?!.*(hong\\s?kong|香港|hk|taiwan|台湾|tw|singapore|新加坡|sg|japan|日本|jp|united\\s?states|美国|us|korea|韩国|kr|canada|加拿大|ca|britain|英国|uk|gb|germany|德国|de|france|法国|fr|australia|澳大利亚|澳洲|nl|netherlands|荷兰|russia|俄罗斯|ru|india|印度|in|🇭🇰|🇨🇳|🇹🇼|🇸🇬|🇯🇵|🇺🇸|🇰🇷|🇨🇦|🇬🇧|🇩🇪|🇫🇷|🇦🇺|🇷🇺|🇳🇱|🇮🇳)).*`
-	    }
+	    ...availableGroups // 展开所有动态生成的国家组
 	  ];
 	  return config;
 	};
