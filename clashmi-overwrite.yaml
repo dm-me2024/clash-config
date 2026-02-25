@@ -1,0 +1,320 @@
+# ① 订阅锚点
+Anchor_PR: &Anchor_PR
+  type: http
+  interval: 86400
+  proxy: DIRECT
+  health-check:
+    enable: true
+    url: "https://www.g.cn/generate_204"
+    interval: 300
+  filter: "^(?!.*(到期|过期|剩余|网址|官网|邮箱|订阅|套餐|流量|说明|重置)).*$"
+
+# ================= 核心配置 =================
+mixed-port: 7893
+mode: rule
+allow-lan: true
+bind-address: "*"
+tcp-concurrent: true
+unified-delay: true
+log-level: info
+ipv6: true
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# 管理面板
+external-ui-name: zashboard
+external-ui: ui
+external-controller: 0.0.0.0:9090
+secret: ""
+external-ui-url: https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip
+
+# TUN配置
+tun:
+  enable: true
+  stack: system
+  dns-hijack:
+    - 0.0.0.0:53
+  auto-detect-interface: true
+  auto-route: true
+  auto-redirect: true
+  strict-route: false
+  endpoint-independent-nat: true
+
+# 嗅探功能
+sniffer:
+  enable: true
+  override-destination: true
+  parse-pure-ip: true
+  force-dns-mapping: true
+  sniff:
+    QUIC:
+      ports:
+        - 443
+    TLS:
+      ports:
+        - 443
+        - 8443
+    HTTP:
+      ports:
+        - 80
+        - 8080-8880
+      override-destination: true
+  force-domain:
+    - "+.netflix.com"
+    - "+.nflxvideo.net"
+    - "+.amazonaws.com"
+    - "+.media.dssott.com"
+  skip-domain:
+    - "+.apple.com"
+    - Mijia Cloud
+    - dlg.io.mi.com
+    - "+.oray.com"
+    - "+.sunlogin.net"
+    - "+.push.apple.com"
+
+# DNS 设置
+dns:
+  enable: true
+  listen: 0.0.0.0:7874
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+  respect-rules: false
+  fake-ip-filter:
+    - "*.lan"
+    - "rule-set:cn_domain"
+  default-nameserver:
+    - 114.114.114.114
+    - tls://223.5.5.5:853
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+
+# ================= 代理策略组（按脚本替换） =================
+proxy-groups:
+  - name: "PROXY"
+    type: select
+    proxies:
+      - "⚡ Auto-Fallback"
+      - "🔀 Load-Balance"
+      - "🇭🇰HK-AUTO"
+      - "🇨🇳TW-AUTO"
+      - "🇸🇬SG-AUTO"
+      - "🇯🇵JP-AUTO"
+      - "🇺🇸US-AUTO"
+      - "🇰🇷KR-AUTO"
+      - "🇨🇦CA-AUTO"
+      - "🇬🇧GB-AUTO"
+      - "🇩🇪DE-AUTO"
+      - "🇫🇷FR-AUTO"
+      - "🇦🇺AU-AUTO"
+      - "🇷🇺RU-AUTO"
+      - "🇳🇱NL-AUTO"
+      - "🇮🇳IN-AUTO"
+      - "OTHER-AUTO"
+
+  - name: "⚡ Auto-Fallback"
+    type: fallback
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    proxies:
+      - "🇭🇰HK-AUTO"
+      - "🇨🇳TW-AUTO"
+      - "🇸🇬SG-AUTO"
+      - "🇯🇵JP-AUTO"
+      - "🇺🇸US-AUTO"
+      - "🇰🇷KR-AUTO"
+      - "🇨🇦CA-AUTO"
+      - "🇬🇧GB-AUTO"
+      - "🇩🇪DE-AUTO"
+      - "🇫🇷FR-AUTO"
+      - "🇦🇺AU-AUTO"
+      - "🇷🇺RU-AUTO"
+      - "🇳🇱NL-AUTO"
+      - "🇮🇳IN-AUTO"
+      - "OTHER-AUTO"
+
+  - name: "🔀 Load-Balance"
+    type: load-balance
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    strategy: consistent-hashing
+    proxies:
+      - "🇭🇰HK-AUTO"
+      - "🇨🇳TW-AUTO"
+      - "🇸🇬SG-AUTO"
+      - "🇯🇵JP-AUTO"
+      - "🇺🇸US-AUTO"
+      - "🇰🇷KR-AUTO"
+      - "🇨🇦CA-AUTO"
+      - "🇬🇧GB-AUTO"
+      - "🇩🇪DE-AUTO"
+      - "🇫🇷FR-AUTO"
+      - "🇦🇺AU-AUTO"
+      - "🇷🇺RU-AUTO"
+      - "🇳🇱NL-AUTO"
+      - "🇮🇳IN-AUTO"
+      - "OTHER-AUTO"
+
+  - name: "🇭🇰HK-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(hong\\s?kong|香港|hk|🇭🇰).*"
+
+  - name: "🇨🇳TW-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(taiwan|台湾|tw|🇹🇼).*"
+
+  - name: "🇸🇬SG-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(singapore|新加坡|狮城|sg|🇸🇬).*"
+
+  - name: "🇯🇵JP-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(japan|日本|jp|🇯🇵).*"
+
+  - name: "🇺🇸US-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(united\\s?states|美国|us|🇺🇸).*"
+
+  - name: "🇰🇷KR-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(korea|韩国|south\\s?korea|kr|🇰🇷).*"
+
+  - name: "🇨🇦CA-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(canada|加拿大|ca|🇨🇦).*"
+
+  - name: "🇬🇧GB-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(great\\s?britain|britain|英国|uk|🇬🇧).*"
+
+  - name: "🇩🇪DE-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(germany|德国|de|🇩🇪).*"
+
+  - name: "🇫🇷FR-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(france|法国|fr|🇫🇷).*"
+
+  - name: "🇦🇺AU-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(australia|澳大利亚|澳洲|au|🇦🇺).*"
+
+  - name: "🇷🇺RU-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(russia|俄罗斯|ru|🇷🇺).*"
+
+  - name: "🇳🇱NL-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(netherlands|荷兰|nl|🇳🇱).*"
+
+  - name: "🇮🇳IN-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(india|印度|in|🇮🇳).*"
+
+  - name: "OTHER-AUTO"
+    type: url-test
+    url: "http://www.google.com/generate_204"
+    interval: 600
+    tolerance: 80
+    include-all: true
+    filter: "^(?!.*(Traffic|Expire|过期|流量|剩余|重置|到期|套餐|\\d+\\s?(GB|TB|MB)|Days?\\s?Left)).*(?i)(?!.*(hong\\s?kong|香港|hk|🇭🇰|taiwan|台湾|tw|🇹🇼|singapore|新加坡|狮城|sg|🇸🇬|japan|日本|jp|🇯🇵|united\\s?states|美国|us|🇺🇸|korea|韩国|south\\s?korea|kr|🇰🇷|canada|加拿大|ca|🇨🇦|great\\s?britain|britain|英国|uk|🇬🇧|germany|德国|de|🇩🇪|france|法国|fr|🇫🇷|australia|澳大利亚|澳洲|au|🇦🇺|russia|俄罗斯|ru|🇷🇺|netherlands|荷兰|nl|🇳🇱|india|印度|in|🇮🇳)).*"
+
+# ================= 规则（按脚本替换） =================
+rules:
+  - RULE-SET,APP-DIRECT,DIRECT
+  - RULE-SET,DO-DIRECT,DIRECT
+  - RULE-SET,APPLE-DIRECT,DIRECT
+  - RULE-SET,DO-PROXY,PROXY
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,PROXY
+
+# ================= 规则来源（按脚本替换） =================
+rule-providers:
+  DO-DIRECT:
+    type: http
+    behavior: domain
+    format: text
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt"
+    interval: 86400
+
+  DO-PROXY:
+    type: http
+    behavior: domain
+    format: text
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt"
+    interval: 86400
+
+  APPLE-DIRECT:
+    type: http
+    behavior: domain
+    format: yaml
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt"
+    interval: 86400
+
+  APP-DIRECT:
+    type: http
+    behavior: classical
+    format: yaml
+    url: "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt"
+    interval: 86400
